@@ -3,19 +3,27 @@ from fastapi import FastAPI, Request
 
 app = FastAPI()
 
+@app.get("/")
+def home():
+    return {"status": "ok"}
+
 @app.post("/prorate")
 async def prorate(req: Request):
-    b = await req.json()
+    try:
+        b = await req.json()
 
-    old = b["old_price"]
-    new = b["new_price"]
-    year = b["year"]
-    month = b["month"]
-    day = b["upgrade_day"]
+        old = float(b["old_price"])
+        new = float(b["new_price"])
+        year = int(b["year"])
+        month = int(b["month"])
+        day = int(b["upgrade_day"])
 
-    dim = calendar.monthrange(year, month)[1]
-    remaining = dim - day + 1
+        dim = calendar.monthrange(year, month)[1]
+        remaining = dim - day + 1
 
-    charge = round((new - old) * (remaining / dim), 2)
+        charge = round((new - old) * (remaining / dim), 2)
 
-    return {"charge": charge}
+        return {"charge": charge}
+
+    except Exception as e:
+        return {"error": str(e)}
